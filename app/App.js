@@ -1,36 +1,99 @@
-import React from "react";
-import { View, Text, TouchableOpacity,
-   StyleSheet, Alert } from 'react-native';
+import React, {useState} from "react";
+import { View, Text, TouchableOpacity, TextInput,
+   ActivityIndicator, StyleSheet, Alert, FlatList } from 'react-native';
+
+   let arr = [];
 
 const App = () => {
 
+  const [searchName, setSearchName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState({});
+
+
+
   const doSomething = async() => {
-    const api = 'https://itunes.apple.com/search?term=metallica';
+    setIsLoading(true);
+    const api = `https://itunes.apple.com/search?term=${searchName}&entity=music`;
     const response = await fetch(api, {
       method: 'get'
     });
     const data = await response.json();
-    console.log(data);
+    arr = data.results;
+
+    //console.log(results);
+    setIsLoading(false);
   }
+
+
 
   return(
     <View style={myStyle.container}>
-      <TouchableOpacity style={myStyle.btn} onPress={doSomething}>
-        <Text style={myStyle.btntext}>Click Me</Text>
-      </TouchableOpacity>
+      <View style={{width:'100%', flexDirection:'row', height:'10%'}}>
+        <View style={{width:'75%', justifyContent:'center'}}>
+
+            <TextInput
+              style={{
+                width:'98%',
+                borderRadius:6,
+                fontSize:18,
+                paddingVertical:10,
+                backgroundColor:'#fff'
+              }}
+              value={searchName}
+              onChangeText={x => {setSearchName(x)}}
+              keyboardType="default"
+              placeholder="Type search..."
+              autoCapitalize='none'
+              secureTextEntry={false}
+
+            />
+
+        </View>
+        <View style={{width:'25%', justifyContent:'center', alignItems:'center'}}>
+        {
+        isLoading 
+        ? (<ActivityIndicator size='large' color='#17B890' />) 
+        : (
+          <TouchableOpacity style={myStyle.btn} onPress={doSomething}>
+            <Text style={myStyle.btntext}>Search</Text>
+          </TouchableOpacity>
+        )
+      }
+        </View>
+      </View>
+      <View style={{width:'100%', height:'90%'}}>
+        
+
+      {
+        arr ? (
+          <FlatList
+          data={results}
+          keyExtractor={item => item.trackId}
+          renderItem={itemRow => 
+          <View>
+            <Text>{itemRow.item.artistName}</Text>
+          </View>}
+        />
+        ) : (
+          <Text>No results</Text>
+        )
+      }
+
+
+      </View>
     </View>
   )
 }
 
 const myStyle = StyleSheet.create({
-  btn:{width:'100%', paddingVertical:18,
+  btn:{width:'100%', paddingVertical:10,
   alignItems:'center', backgroundColor:'#17B890',
-  borderRadius:14
+  borderRadius:6
   },
   btntext: {color:'#DEE5E5', fontSize:22, fontWeight:'700'},
-  container: {flex:1, 
-    alignItems:'center', padding:30,
-    justifyContent:'center', backgroundColor:'#DEE5E5'}
+  container: {flex:1, padding:30,
+    backgroundColor:'#DEE5E5'}
 });
 
 export default App;
