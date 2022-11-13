@@ -1,27 +1,22 @@
 import React, {useState} from "react";
-import { View, Text, TouchableOpacity, TextInput,
+import { View, Text, TouchableOpacity, TextInput, Image,
    ActivityIndicator, StyleSheet, Alert, FlatList } from 'react-native';
 
-   let arr = [];
 
 const App = () => {
 
-  const [searchName, setSearchName] = useState('');
+  const [searchName, setSearchName] = useState('characters');
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState({});
-
-
+  const [results, setResults] = useState([]);
 
   const doSomething = async() => {
     setIsLoading(true);
-    const api = `https://itunes.apple.com/search?term=${searchName}&entity=music`;
+    const api = `https://www.breakingbadapi.com/api/${searchName}`;
     const response = await fetch(api, {
       method: 'get'
     });
     const data = await response.json();
-    arr = data.results;
-
-    //console.log(results);
+    setResults(data);
     setIsLoading(false);
   }
 
@@ -62,31 +57,64 @@ const App = () => {
       }
         </View>
       </View>
-      <View style={{width:'100%', height:'90%'}}>
-        
 
+
+      <View style={{width:'100%', height:'90%'}}>
       {
-        arr ? (
+        results ? (
           <FlatList
           data={results}
-          keyExtractor={item => item.trackId}
+          keyExtractor={item => item.char_id}
           renderItem={itemRow => 
-          <View>
-            <Text>{itemRow.item.artistName}</Text>
+          <View style={myStyle.row_container}>
+              <View style={myStyle.image_container}>
+                <Image style={myStyle.image} source={{uri: itemRow.item.img}} />
+              </View>
+              <View style={myStyle.name_container}>
+                <Text style={myStyle.name}>{itemRow.item.name}</Text>
+                <Text>{itemRow.item.nickname}</Text>
+                <View style={myStyle.line}></View>
+                <Text style={myStyle.occupation}>{itemRow.item.occupation}</Text>
+              </View>
           </View>}
         />
         ) : (
           <Text>No results</Text>
         )
       }
-
-
       </View>
+
+
+
     </View>
   )
 }
 
 const myStyle = StyleSheet.create({
+  line:{
+    width:'100%', height:1, backgroundColor:'#ebebeb', marginVertical:5
+  },
+  image: {
+    width:'100%', height:105
+  },
+  row_container: {
+    width:'100%', flexDirection:'row', marginBottom:12,
+    borderTopLeftRadius:0, borderTopRightRadius:12,
+    borderBottomLeftRadius:0, borderBottomRightRadius:12,
+    backgroundColor:'#ffffff'
+  },
+  image_container: {
+    width:'30%',
+  },
+  name_container : {
+    width:'70%', padding:10
+  },
+  name: {
+    fontSize:17, fontWeight:'700', color:'#17b890'
+  },
+  occupation: {
+    fontSize:10, fontStyle:'italic'
+  },
   btn:{width:'100%', paddingVertical:10,
   alignItems:'center', backgroundColor:'#17B890',
   borderRadius:6
